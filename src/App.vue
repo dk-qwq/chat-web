@@ -1,9 +1,6 @@
 <template>
   <ChatRoom />
-  <AuthCard 
-    v-if="showLogin"
-    @close="showLogin = false"
-  />
+  <AuthCard v-if="showLogin" @close="showLogin = false" />
 </template>
 
 <script setup lang="ts">
@@ -11,9 +8,10 @@
 import ChatRoom from './components/ChatRoom.vue';
 
 import AuthCard from './components/AuthCard.vue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useUserStore } from './stores/user.ts';
 
-const showLogin = ref<boolean>(true);
+const showLogin = computed(() => !useUserStore().isLoggedIn)
 
 </script>
 

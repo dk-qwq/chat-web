@@ -1,10 +1,10 @@
 <template>
     <div class="msg-row" :class="'msg-' + getMessageDir(msg)">
-        <div class="avatar" :class="'avatar-' + getMessageDir(msg)">{{ msg.userId[0] }}</div>
+        <div class="avatar" :class="'avatar-' + getMessageDir(msg)">{{ msg.user_name[0] }}</div>
         <div class="msg-body">
-            <span class="sender">{{ msg.userId }}</span>
-            <div class="bubble">{{msg.content}}</div>
-            <span class="time">{{formatTimestamp(msg.timestamp)}}</span>
+            <span class="sender">{{ msg.user_name }}</span>
+            <div class="bubble">{{ msg.content }}</div>
+            <span class="time">{{ formatTimestamp(msg.timestamp) }}</span>
         </div>
     </div>
 </template>
@@ -14,13 +14,15 @@
 import type { Message } from '@/type/message';
 import { formatTimestamp } from '@/type/message';
 
-const { 
-    message: msg,
-    userId
-} = defineProps(['message', 'userId'])
+interface Props {
+    message: Message,
+    userName: string
+}
+
+const { message: msg, userName } = defineProps<Props>()
 
 const isMe = (message: Message): boolean => {
-    return message.userId == userId;
+    return message.user_name == userName;
 }
 
 const getMessageDir = (message: Message): string => {

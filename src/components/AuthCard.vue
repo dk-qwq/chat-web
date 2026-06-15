@@ -43,7 +43,7 @@ import { ref, resolveComponent } from "vue";
 const usrname = ref<string>("");
 const password = ref<string>("");
 import { useUserStore } from "@/stores/user";
-import axios, { HttpStatusCode } from "axios";
+import axios from "axios";
 const userStore = useUserStore();
 
 const emit = defineEmits(["close"]);
@@ -59,7 +59,7 @@ const handler_Register = async () => {
     if (!usrname.value || !password.value) {
         feedbackMsg.value = "用户名或密码不能为空";
         feedbackStatus.value = "error";
-        return ;
+        return;
     }
 
     const postData = {
@@ -88,7 +88,7 @@ const handler_Login = async () => {
     if (!usrname.value || !password.value) {
         feedbackMsg.value = "用户名或密码不能为空";
         feedbackStatus.value = "error";
-        return ;
+        return;
     }
 
     const postData = {
@@ -98,7 +98,7 @@ const handler_Login = async () => {
 
     try {
         const response = await axios.post('/api/login', postData);
-        
+
         feedbackMsg.value = response.data.message;
         feedbackStatus.value = "success";
 
@@ -107,7 +107,7 @@ const handler_Login = async () => {
         await sleep(500);
         emit("close");
     } catch (error) {
-        if(axios.isAxiosError(error)) {
+        if (axios.isAxiosError(error)) {
             feedbackMsg.value = error.response?.data?.message || "未知错误";
         } else {
             feedbackMsg.value = "未知错误";

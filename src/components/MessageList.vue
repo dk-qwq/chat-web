@@ -1,11 +1,6 @@
 <template>
     <div class="message - list">
-        <MessageItem
-            v-for="msg in messages"
-            :message="msg"
-            :userId = "userId"
-            :key="msg.timestamp"
-        />
+        <MessageItem v-for="msg in messages" :message="msg" :userName="userName" :key="msg.timestamp" />
     </div>
 </template>
 
@@ -17,7 +12,7 @@ import type { Message } from '@/type/message';
 import { useUserStore } from '@/stores/user';
 import { storeToRefs } from 'pinia';
 
-const { userId } = storeToRefs(useUserStore())
+const { userName } = storeToRefs(useUserStore())
 
 defineProps<{
     messages: Message[]
