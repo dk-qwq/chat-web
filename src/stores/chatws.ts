@@ -24,8 +24,6 @@ export const useChatWsStore = defineStore('chatWs', () => {
         const url = "/api/ws"
         ws.value = new WebSocket(url)
 
-        console.log(`Websocket ${url} connected`)
-
         ws.value.onopen = () => {
             connected.value = true
             console.log(`Websocket ${url} connected`)
@@ -61,7 +59,7 @@ export const useChatWsStore = defineStore('chatWs', () => {
     const sendMessage = (msg: string) => {
         if (ws.value?.readyState == WebSocket.OPEN) {
             const message: Message = {
-                "id": "0",
+                "id": 0,
                 "user_name": userName.value,
                 "content": msg,
                 "timestamp": Date.now()
