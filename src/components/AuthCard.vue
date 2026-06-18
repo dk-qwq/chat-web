@@ -44,6 +44,7 @@ const usrname = ref<string>("");
 const password = ref<string>("");
 import { useUserStore } from "@/stores/user";
 import axios from "axios";
+import { API_CONFIG } from "@/constants/api";
 const userStore = useUserStore();
 
 const emit = defineEmits(["close"]);
@@ -68,7 +69,7 @@ const handler_Register = async () => {
     }
 
     try {
-        const response = await axios.post('/api/register', postData);
+        const response = await axios.post('/api/register', postData, { timeout: API_CONFIG.TIMEOUT });
         feedbackMsg.value = response.data.message;
         feedbackStatus.value = "success";
 
@@ -97,7 +98,7 @@ const handler_Login = async () => {
     }
 
     try {
-        const response = await axios.post('/api/login', postData);
+        const response = await axios.post('/api/login', postData, { timeout: API_CONFIG.TIMEOUT });
 
         feedbackMsg.value = response.data.message;
         feedbackStatus.value = "success";

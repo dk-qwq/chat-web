@@ -5,13 +5,12 @@
         </div>
 
         <div class="chat-body">
-            <MessageList :messages="messageList" />
+            <MessageList ref="messageListRef" :messages="messageList" @load-newer-messages="loadNewerMsg"
+                @load-older-messages="loadOlderMsg" />
         </div>
 
-        <!-- TODO remove id input -->
         <div class="chat-footer">
-            <input v-model="content" type="text" placeholder="输入content" />
-            <!-- <input v-model="id" type="text" placeholder="输入id" /> -->
+            <input v-model="content" type="text" placeholder="输入消息..." />
             <button @click="sendMsg"> 发送 </button>
         </div>
     </div>
@@ -20,22 +19,81 @@
 <script setup lang="ts">
 
 import MessageList from './MessageList.vue';
-import { ref } from 'vue';
-import { useChatWsStore } from '@/stores/chatws.ts';
+import { nextTick, onMounted, ref, useTemplateRef, watch } from 'vue';
+import { useChatStore } from '@/stores/chat.ts';
+import { storeToRefs } from 'pinia';
 
-const chatWsStore = useChatWsStore()
+const chatStore = useChatStore()
 
-const messageList = chatWsStore.messageList;
+const { messageList } = storeToRefs(chatStore);
 
-// TODO: del this
-let msgId = 0
 const content = ref<string>('')
-// const id = ref<string>('')
 
-const sendMsg = () => {
-    chatWsStore.sendMessage(content.value)
+const messageListRef = useTemplateRef<InstanceType<typeof MessageList>>('messageListRef')
+
+const sendMsg = async () => {
+    if (content.value.length == 0) {
+        return
+    }
+
+    paddingScrollToBottom.value = true
+
+    chatStore.sendMessage(content.value)
     content.value = ""
 }
+
+const scrollToBottomSync = async (behavior?: ScrollBehavior) => {
+    await nextTick()
+    messageListRef.value?.scrollToBottom(behavior)
+}
+
+const navEntry = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming
+
+// TODO: fix scrollBottom where reload
+// navEntry.type !== "reload"
+const needInitialScroll = ref<boolean>(true)
+
+const paddingScrollToBottom = ref<boolean>(false)
+
+
+
+const loadOlderMsg = async () => {
+    if (messageListRef.value == null) return
+    if (messageList.value.length == 0) return
+
+    const oldScrollTop = messageListRef.value.getScrollTop()
+    const oldScrollHeight = messageListRef.value.getScrollHeight()
+
+    await chatStore.loadOlderMessages()
+
+    const newScrollHeight = messageListRef.value.getScrollHeight()
+    messageListRef.value.scrollTo(
+        oldScrollTop +
+        (newScrollHeight - oldScrollHeight)
+    )
+}
+
+const loadNewerMsg = () => {
+    if (messageList.value.length == 0) return
+
+    chatStore.loadNewerMessages()
+}
+
+
+watch(
+    () => messageList.value.length,
+    async (newLen, oldLen) => {
+        if (needInitialScroll.value) {
+            await scrollToBottomSync()
+        } else if (paddingScrollToBottom.value || messageListRef.value?.getIsAtBottom()) {
+            await scrollToBottomSync('smooth')
+        }
+
+        needInitialScroll.value = false
+        paddingScrollToBottom.value = false
+    },
+    { flush: "post" }
+)
 
 </script>
 
@@ -72,21 +130,9 @@ const sendMsg = () => {
 /* 消息滚动区 */
 .chat-body {
     flex: 1;
-    /* 占据剩余高度 */
-    overflow-y: auto;
-    /* 内容多时滚动 */
+    min-height: 0;
     padding: 16px;
-    /* 让滚动条好看点 */
-    scroll-behavior: smooth;
-}
-
-.chat-body::-webkit-scrollbar {
-    width: 5px;
-}
-
-.chat-body::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 3px;
+    padding-right: 5px;
 }
 
 /* 底部输入区 */

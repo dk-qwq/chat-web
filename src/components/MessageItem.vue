@@ -12,7 +12,7 @@
 <script setup lang="ts">
 
 import type { Message } from '@/type/message';
-import { formatTimestamp } from '@/type/message';
+import { formatTimestamp } from '@/utils/message';
 
 interface Props {
     message: Message,
